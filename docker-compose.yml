@@ -1,0 +1,8 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    image: banking-mod:latest
+    environment:
+      - GIN_MODE=release
