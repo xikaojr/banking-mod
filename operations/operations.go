@@ -9,11 +9,27 @@ import (
 	"os"
 	"strings"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 var accounts []models.BankAccount
 var persons []models.Person
 var fullName []string
+var accountTypes []models.AccountType
+
+func CreateDefaultAccountTypes() {
+	// Create instances of AccountType
+	accountTypes = []models.AccountType{
+		{Id: uuid.New(), Name: "Conta Corrente"},
+		{Id: uuid.New(), Name: "Conta Poupança"},
+		{Id: uuid.New(), Name: "Conta Fidelidade"},
+	}
+
+	for _, accountType := range accountTypes {
+		fmt.Printf("ID: %s, Name: %s\n", accountType.Id.String(), accountType.Name)
+	}
+}
 
 func AskNameUser() {
 	reader := bufio.NewReader(os.Stdin)
@@ -44,19 +60,23 @@ func findAccount(accountNumber int) *models.BankAccount {
 	return nil
 }
 
-func CreateBankAccount(accountType string) {
+func CreateBankAccount(accountType string, startBalanceZero bool) {
 	accb := utils.NextAccountNumber()
 	var amount float64 = 0
 
-	if accountType == "Conta Corrente" {
-		amount = utils.RandomFloat(10, 1000)
-	} else {
+	findAccountTypeByName := findAccountType(accountTypes, func(a models.AccountType) bool {
+		return a.Name == accountType
+	})
+
+	if startBalanceZero {
 		amount = 0
+	} else {
+		amount = utils.RandomFloat(10, 1000)
 	}
 
 	fmt.Println("Criando sua Conta Bancária!")
 
-	accounts = append(accounts, models.BankAccount{AccountNumber: accb, AccountType: accountType, Balance: amount, Person: persons[0]})
+	accounts = append(accounts, models.BankAccount{AccountNumber: accb, AccountType: findAccountTypeByName, Balance: amount, Person: persons[0]})
 	amountformatted := fmt.Sprintf("%.2f", amount)
 
 	time.Sleep(2 * time.Second)
@@ -80,7 +100,7 @@ func ShowAccountsCreated() {
 	for _, acc := range accounts {
 		table = append(table, []string{
 			fmt.Sprintf("%d", acc.AccountNumber),
-			acc.AccountType,
+			acc.AccountType.Name,
 			fmt.Sprintf("%.2f", acc.Balance),
 		})
 	}
@@ -232,55 +252,16 @@ func TransferToAnotherAccount(accorg int, accdes int, amncheck float64) {
 	showAccountBalance(accOrigem.Balance, "Saldo atual da conta corrente: ")
 }
 
-// 	case 9:
-// 		// Render juros de uma conta poupança
-// 		fmt.Printf("Função não implementada...\n")
-// 		time.Sleep(3 * time.Second)
-// 		continue
-// 	case 10:
-// 		// Render bônus de uma conta fidelidade
-// 		fmt.Printf("Função não implementada...\n")
-// 		time.Sleep(3 * time.Second)
-// 		continue
-// 	case 11:
-// 		// Remover uma conta
-// 		fmt.Println("Qual o numero da sua conta?")
-// 		inputacc, _ := fmt.Scan(&opcao)
+// Find account type using a custom condition function
+func findAccountType(accountTypes []models.AccountType, condition func(models.AccountType) bool) *models.AccountType {
+	for _, accountType := range accountTypes {
+		if condition(accountType) {
+			return &accountType
+		}
+	}
+	return nil
+}
 
-// 		acc := findAccount(inputacc)
+func CloseAccount() {
 
-// 		if acc == nil {
-// 			fmt.Println("Conta não encontrada, verifique e tente novamente!")
-// 			time.Sleep(1 * time.Second)
-// 			fmt.Println("Voltando ao Menu Principal!")
-//  			time.Sleep(1 * time.Second)
-// 			continue
-// 		}
-
-// 		fmt.Println("Cancelando Conta...Espere!")
-// 		time.Sleep(3 * time.Second)
-// 		fmt.Println("Conta Cancelada!")
-// 	case 12:
-// 		fmt.Println("Buscando todas as contas")
-// 		time.Sleep(3 * time.Second)
-// 		// Imprimir número e saldo de todas as contas cadastradas
-// 		// Listar todas as contas
-// 		fmt.Println("Listando todas as contas...")
-// 		fmt.Println("+--------+-------------+-------------------+")
-// 		fmt.Println("| Número | Tipo de conta | Saldo            |")
-// 		fmt.Println("+--------+-------------+-------------------+")
-// 		for _, acc := range accounts {
-// 			fmt.Println("| %5d | %10s | %15.2f |", acc.AccountNumber, acc.AccountType, acc.Balance)
-// 		}
-// 		fmt.Println("+--------+-------------+-------------------+")
-
-// 	case 0:
-// 		fmt.Println("Saindo...")
-// 		time.Sleep(3 * time.Second)
-// 		fmt.Printf("Até Logo")
-// 		os.Exit(0)
-
-// 	default:
-// 		fmt.Println("Opção inválida!")
-// 	}
-// }
+}

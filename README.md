@@ -1,5 +1,5 @@
 # go-rest-api
-Simple Simulated Banking Account Applications With Golang.
+Single Application simulated a Banking Account Management With Golang.
 ## Stack utilizada
 
 **Back-end:** Go, Docker
