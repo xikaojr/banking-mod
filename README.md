@@ -1,4 +1,3 @@
-# go-rest-api
 Single Application simulated a Banking Account Management With Golang.
 ## Stack utilizada
 
